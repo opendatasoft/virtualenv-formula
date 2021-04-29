@@ -92,6 +92,24 @@ virtualenv.deploy_{{ project }}:
         {% endif %}
         - process_dependency_links: {{ options.process_dependency_links | default('False') }}
 
+{% set compile_paths = [options.name] %}
+
+{% if 'editable' in options %}
+{% for editable_item in options.editable %}
+
+{% do compile_paths.append(editable_item) %}
+virtualenv.install_editable_{{project}}_{{loop.index0}}:
+  pip.installed:
+    - bin_env: {{ options.name }}
+    - editable: {{ editable_item }}
+
+{% endfor %}
+{% endif %}
+virtualenv.compile_{{project}}:
+  cmd.run:
+    - name: |
+        {{ options.name }}/bin/python -m compileall -f {{ compile_paths | join(" ")}} | grep -vE "^Listing"
+
 {% else %}
 
 virtualenv.delete_{{ project }}:
