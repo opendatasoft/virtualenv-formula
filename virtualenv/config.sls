@@ -92,6 +92,23 @@ virtualenv.deploy_{{ project }}:
         {% endif %}
         - process_dependency_links: {{ options.process_dependency_links | default('False') }}
 
+virtualenv.compile_{{project}}:
+  cmd.run:
+    - cwd: {{ options.name }}
+    - name: {{ options.name }}/bin/python -m compileall -f .
+
+{% if 'editable' in options %}
+virtualenv.compile_editable_{{project}}:
+  cmd.run:
+    - cwd: {{ options.editable }}
+    - name: {{ options.name }}/bin/python -m compileall -f .
+
+virtualenv.install_editable_{{project}}:
+  pip.installed:
+    - bin_env: {{ options.name }}
+    - editable: {{ options.editable }}
+{% endif %}
+
 {% else %}
 
 virtualenv.delete_{{ project }}:
