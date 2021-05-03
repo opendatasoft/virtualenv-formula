@@ -107,7 +107,8 @@ virtualenv.install_editable_{{project}}_{{loop.index0}}:
 {% endif %}
 virtualenv.compile_{{project}}:
   cmd.run:
-    - name: {{ options.name }}/bin/python -m compileall -f {{ compile_paths | join(" ")}}
+    - name: |
+        {{ options.name }}/bin/python -m compileall -f {{ compile_paths | join(" ")}} | grep -vE "^Listing"
 
 {% else %}
 
