@@ -92,22 +92,22 @@ virtualenv.deploy_{{ project }}:
         {% endif %}
         - process_dependency_links: {{ options.process_dependency_links | default('False') }}
 
-virtualenv.compile_{{project}}:
-  cmd.run:
-    - cwd: {{ options.name }}
-    - name: {{ options.name }}/bin/python -m compileall -f .
+{% set compile_paths = [options.name] %}
 
 {% if 'editable' in options %}
-virtualenv.compile_editable_{{project}}:
-  cmd.run:
-    - cwd: {{ options.editable }}
-    - name: {{ options.name }}/bin/python -m compileall -f .
+{% for editable_item in options.editable %}
 
-virtualenv.install_editable_{{project}}:
+{% do compile_paths.append(editable_item) %}
+virtualenv.install_editable_{{project}}_{{loop.index0}}:
   pip.installed:
     - bin_env: {{ options.name }}
-    - editable: {{ options.editable }}
+    - editable: {{ editable_item }}
+
+{% endfor %}
 {% endif %}
+virtualenv.compile_{{project}}:
+  cmd.run:
+    - name: {{ options.name }}/bin/python -m compileall -f {{ compile_paths | join(" ")}}
 
 {% else %}
 
